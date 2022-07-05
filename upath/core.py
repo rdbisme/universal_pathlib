@@ -4,11 +4,8 @@ import pathlib
 import re
 import sys
 from os import PathLike
-from typing import Sequence
-from typing import TypeVar
-from typing import TYPE_CHECKING
-from urllib.parse import urlsplit
-from urllib.parse import urlunsplit
+from typing import TYPE_CHECKING, Sequence, TypeVar
+from urllib.parse import urlsplit, urlunsplit
 
 from fsspec.registry import get_filesystem_class
 from fsspec.utils import stringify_path
@@ -16,9 +13,9 @@ from fsspec.utils import stringify_path
 from upath.registry import get_upath_class
 
 if TYPE_CHECKING:
-    from typing import Any
-    from typing import Generator
+    from typing import Any, Generator
     from urllib.parse import SplitResult
+
     from fsspec.spec import AbstractFileSystem
 
 __all__ = [
@@ -96,6 +93,8 @@ class UPath(pathlib.Path):
     )
     _flavour = pathlib._posix_flavour  # type: ignore
     _default_accessor = _FSSpecAccessor
+    
+    _WIN_URL_PARSE_PATTERN = re.compile(r"(?P<scheme>\S+://)(?P<path>.*)")
 
     # typing
     _drv: str
@@ -132,7 +131,7 @@ class UPath(pathlib.Path):
             )
 
         else:
-            url = stringify_path(other)
+            url = cls._sanitize_path(stringify_path(first))
             parsed_url = urlsplit(url)
             for key in ["scheme", "netloc"]:
                 val = kwargs.get(key)
@@ -161,6 +160,17 @@ class UPath(pathlib.Path):
             return _accessor
         else:
             raise AttributeError(item)
+
+    @classmethod
+    def _sanitize_path(cls, str_path: str) -> str: 
+        if os.name == "nt":
+            match = cls._WIN_URL_PARSE_PATTERN.search(str_path)
+            if match:
+                scheme = match.group("scheme")
+                path = pathlib.PurePath(match.group("path")).as_posix()
+                return f"{scheme}{path}"
+
+        return str_path
 
     def _make_child(self: PT, args: list[str]) -> PT:
         drv, root, parts = self._parse_args(args)
