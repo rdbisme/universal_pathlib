@@ -1,20 +1,18 @@
 import os
-import shutil
-import tempfile
-from pathlib import Path
-import subprocess
 import shlex
+import shutil
+import subprocess
+import sys
+import tempfile
 import threading
 import time
-import sys
-
-import pytest
-from fsspec.implementations.local import LocalFileSystem
-from fsspec.registry import register_implementation, _registry
-
-from azure.storage.blob import BlobServiceClient
+from pathlib import Path
 
 import fsspec
+import pytest
+from azure.storage.blob import BlobServiceClient
+from fsspec.implementations.local import LocalFileSystem
+from fsspec.registry import _registry, register_implementation
 
 
 
@@ -300,8 +298,8 @@ def http_fixture(local_testdir, http_server):
 
 @pytest.fixture(scope="session")
 def webdav_server():
-    from wsgidav.wsgidav_app import WsgiDAVApp
     from cheroot import wsgi
+    from wsgidav.wsgidav_app import WsgiDAVApp
 
     with tempfile.TemporaryDirectory() as tempdir:
         host = "127.0.0.1"

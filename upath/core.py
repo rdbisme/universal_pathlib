@@ -6,11 +6,7 @@ import urllib
 from typing import Union
 from urllib.parse import ParseResult
 
-from fsspec.registry import (
-    get_filesystem_class,
-    known_implementations,
-    registry,
-)
+from fsspec.registry import get_filesystem_class, known_implementations, registry
 from fsspec.utils import stringify_path
 
 from upath.errors import NotDirectoryError
@@ -392,7 +388,7 @@ class UPath(pathlib.Path):
                 root = "/"
             elif parts[0] == "/":
                 root = parts.pop(0)
-        if len(obj._parts) == 0 or obj._parts[0] != root:
+        if (len(obj._parts) == 0 or obj._parts[0] != root) and root != "":
             obj._parts.insert(0, root)
 
         obj._root = root
