@@ -7,8 +7,6 @@ import pytest
 
 from upath import UPath
 
-from .utils import posixify
-
 
 class BaseTests:
     def test_cwd(self):
@@ -46,7 +44,7 @@ class BaseTests:
             [a.relative_to(self.path).path for a in mock_glob]
         )
         path_glob_normalized = sorted(
-            [f"/{posixify(a.relative_to(pathlib_base))}" for a in path_glob]
+            [f"{a.relative_to(pathlib_base).as_posix()}" for a in path_glob]
         )
 
         assert mock_glob_normalized == path_glob_normalized
