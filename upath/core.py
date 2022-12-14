@@ -6,7 +6,11 @@ import urllib
 from typing import Union
 from urllib.parse import ParseResult
 
-from fsspec.registry import get_filesystem_class, known_implementations, registry
+from fsspec.registry import (
+    get_filesystem_class,
+    known_implementations,
+    registry,
+)
 from fsspec.utils import stringify_path
 
 from upath.errors import NotDirectoryError
@@ -26,7 +30,7 @@ class _FSSpecAccessor:
     def _format_path(self, path: "UPath") -> str:
         return path.path
 
-    def open(self, path, mode='r', *args, **kwargs):
+    def open(self, path, mode="r", *args, **kwargs):
         return self._fs.open(self._format_path(path), mode, *args, **kwargs)
 
     def stat(self, path, **kwargs):
@@ -67,7 +71,7 @@ class UPath(pathlib.Path):
     )
     _flavour = pathlib._posix_flavour
     _default_accessor = _FSSpecAccessor
-    
+
     _WIN_URL_PARSE_PATTERN = re.compile(r"(?P<scheme>\S+://)(?P<path>.*)")
 
     def __new__(cls, *args, **kwargs) -> Union["UPath", pathlib.Path]:
@@ -106,7 +110,7 @@ class UPath(pathlib.Path):
         )
         if parsed_url.scheme and parsed_url.scheme in fsspec_impls:
             cls = upath.registry._registry[parsed_url.scheme]
-            args_list.insert(0, parsed_url.path)
+            args_list.insert(0, f"{parsed_url.netloc}{parsed_url.path}")
             return cls._from_parts(tuple(args_list), url=parsed_url, **kwargs)
 
         # treat as local filesystem, return PosixPath or WindowsPath
@@ -124,7 +128,7 @@ class UPath(pathlib.Path):
             raise AttributeError(item)
 
     @classmethod
-    def _sanitize_path(cls, str_path: str) -> str: 
+    def _sanitize_path(cls, str_path: str) -> str:
         if os.name == "nt":
             match = cls._WIN_URL_PARSE_PATTERN.search(str_path)
             if match:

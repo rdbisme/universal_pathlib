@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import pytest  # noqa: F401
+
 from upath import UPath
 
 from ..cases import BaseTests
@@ -9,6 +10,7 @@ from ..cases import BaseTests
 class TestUPathZip(BaseTests):
     @pytest.fixture(autouse=True, scope="function")
     def path(self, zip_fixture):
+        str(self.path)
         self.path = UPath(f"zip://{zip_fixture}")
 
     def test_stat(self):
