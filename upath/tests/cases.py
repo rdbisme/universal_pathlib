@@ -1,9 +1,10 @@
 import pickle
-from pathlib import Path
 import re
 import sys
+from pathlib import Path
 
 import pytest
+
 from upath import UPath
 
 
@@ -52,7 +53,6 @@ class BaseTests:
             [a.parts[_path_start:] for a in path_glob]
         )
 
-        print(mock_glob_normalized, path_glob_normalized)
         assert mock_glob_normalized == path_glob_normalized
 
     def test_group(self):

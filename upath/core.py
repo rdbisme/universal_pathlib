@@ -93,7 +93,7 @@ class UPath(pathlib.Path):
     )
     _flavour = pathlib._posix_flavour  # type: ignore
     _default_accessor = _FSSpecAccessor
-    
+
     _WIN_URL_PARSE_PATTERN = re.compile(r"(?P<scheme>\S+://)(?P<path>.*)")
 
     # typing
@@ -162,7 +162,7 @@ class UPath(pathlib.Path):
             raise AttributeError(item)
 
     @classmethod
-    def _sanitize_path(cls, str_path: str) -> str: 
+    def _sanitize_path(cls, str_path: str) -> str:
         if os.name == "nt":
             match = cls._WIN_URL_PARSE_PATTERN.search(str_path)
             if match:

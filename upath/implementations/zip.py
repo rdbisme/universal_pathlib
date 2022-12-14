@@ -3,17 +3,18 @@ from __future__ import annotations
 import re
 from urllib.parse import ParseResult
 
-import upath.core
 from fsspec.implementations.zip import ZipFileSystem
+
+import upath.core
 
 
 class _ZipAccessor(upath.core._FSSpecAccessor):
     def __init__(self, parsed_url: ParseResult, **kwargs):
 
-        self._fs = ZipFileSystem(f"{parsed_url.netloc}/{parsed_url.path}")
+        self._fs = ZipFileSystem(f"{parsed_url.netloc}")
 
     def _format_path(self, path: ZipPath):
-        ret = re.sub(rf"^{path._url.path}", "", path.path.lstrip("/"))
+        ret = re.sub(rf"^{path._url.netloc}", "", path.path)
 
         if not (ret):
             return "/"
@@ -38,11 +39,34 @@ class ZipPath(upath.core.UPath):
             + 1
         )
 
-        path = "/".join(url_parts[:zip_ext_index]).lstrip("/")
+        netloc = url.netloc + "/".join(url_parts[:zip_ext_index])
 
-        url = url._replace(path=path)
+        path = "/".join(url_parts[zip_ext_index:])
+
+        if path:
+            path = "/" + path
+
+        url = url._replace(path=path, netloc=netloc)
 
         return super()._from_parts(args, url, **kwargs)
+
+    def _format_parsed_parts(self, drv, root, parts):
+        if parts:
+            join_parts = parts[1:] if parts[0] == "/" else parts
+        else:
+            join_parts = []
+        if drv or root:
+            path = drv + root + self._flavour.join(join_parts)
+        else:
+            path = self._flavour.join(join_parts)
+
+        path = path.replace(self.path, "")
+        scheme, netloc = self._url.scheme, self._url.netloc
+        scheme = scheme + ":"
+        netloc = "//" + netloc if netloc else ""
+
+        formatted = scheme + netloc + "/" + self._accessor._format_path(self)
+        return formatted.rstrip("/") + path
 
     def iterdir(self):
         for name in self._accessor.listdir(self):
