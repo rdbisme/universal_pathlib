@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import pathlib
 import re
 import sys
@@ -131,7 +132,7 @@ class UPath(pathlib.Path):
             )
 
         else:
-            url = cls._sanitize_path(stringify_path(first))
+            url = stringify_path(other)
             parsed_url = urlsplit(url)
             for key in ["scheme", "netloc"]:
                 val = kwargs.get(key)
@@ -519,7 +520,7 @@ class UPath(pathlib.Path):
                 root = "/"
             elif parts[0] == "/":
                 root = parts.pop(0)
-        if (len(obj._parts) == 0 or obj._parts[0] != root) and root != "":
+        if (len(obj._parts) == 0 or obj._parts[0] != root): 
             obj._parts.insert(0, root)
 
         obj._root = root

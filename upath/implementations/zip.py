@@ -1,11 +1,15 @@
 from __future__ import annotations
 
 import re
+from typing import TYPE_CHECKING, TypeVar
 from urllib.parse import ParseResult
 
 from fsspec.implementations.zip import ZipFileSystem
 
 import upath.core
+
+if TYPE_CHECKING:
+    from urllib.parse import SplitResult
 
 
 class _ZipAccessor(upath.core._FSSpecAccessor):
@@ -22,6 +26,7 @@ class _ZipAccessor(upath.core._FSSpecAccessor):
         return ret.lstrip("/")
 
 
+PT = TypeVar("PT", bound="ZipPath")
 class ZipPath(upath.core.UPath):
     _default_accessor = _ZipAccessor
 
@@ -50,23 +55,35 @@ class ZipPath(upath.core.UPath):
 
         return super()._from_parts(args, url, **kwargs)
 
-    def _format_parsed_parts(self, drv, root, parts):
+    @classmethod
+    def _format_parsed_parts(
+        cls: type[PT],
+        drv: str,
+        root: str,
+        parts: list[str],
+        url: SplitResult | None = None,
+        **kwargs: Any,
+    ) -> str:
         if parts:
             join_parts = parts[1:] if parts[0] == "/" else parts
         else:
             join_parts = []
         if drv or root:
-            path = drv + root + self._flavour.join(join_parts)
+            path: str = drv + root + cls._flavour.join(join_parts)
         else:
-            path = self._flavour.join(join_parts)
+            path = cls._flavour.join(join_parts)
+        if not url:
+            scheme: str = kwargs.get("scheme", "file")
+            netloc: str = kwargs.get("netloc", "")
+        else:
+            scheme, netloc = url.scheme, url.netloc
 
-        path = path.replace(self.path, "")
-        scheme, netloc = self._url.scheme, self._url.netloc
+        path = path.replace(netloc, "")
         scheme = scheme + ":"
         netloc = "//" + netloc if netloc else ""
 
-        formatted = scheme + netloc + "/" + self._accessor._format_path(self)
-        return formatted.rstrip("/") + path
+        formatted = scheme + netloc + path
+        return formatted
 
     def iterdir(self):
         for name in self._accessor.listdir(self):

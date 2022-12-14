@@ -63,6 +63,18 @@ class TestUPathZip(BaseTests):
     @pytest.mark.xfail(
         reason="Current fsspec ZipFileSystem implementation is read only"
     )
+    def test_mkdir_exists_ok_true(self):
+        super().test_mkdir_exists_ok_true()
+    
+    @pytest.mark.xfail(
+        reason="Current fsspec ZipFileSystem implementation is read only"
+    )
+    def test_mkdir_exists_ok_false(self):
+        super().test_mkdir_exists_ok_false()
+
+    @pytest.mark.xfail(
+        reason="Current fsspec ZipFileSystem implementation is read only"
+    )
     def test_touch_unlink(self):
         super().test_touch_unlink()
 
