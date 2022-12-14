@@ -14,7 +14,6 @@ from fsspec.registry import register_implementation, _registry
 
 import fsspec
 
-from .utils import posixify
 
 
 def pytest_addoption(parser):
@@ -194,7 +193,7 @@ def s3_fixture(s3_server, local_testdir):
     else:
         s3.mkdir(bucket_name)
     for x in Path(local_testdir).glob("**/*"):
-        target_path = f"{bucket_name}/{posixify(x.relative_to(local_testdir))}"
+        target_path = f"{bucket_name}/{x.relative_to(local_testdir).as_posix()}"
         if x.is_file():
             s3.upload(str(x), target_path)
     s3.invalidate_cache()
@@ -254,7 +253,7 @@ def gcs_fixture(docker_gcs, local_testdir):
     else:
         gcs.mkdir(bucket_name)
     for x in Path(local_testdir).glob("**/*"):
-        target_path = f"{bucket_name}/{posixify(x.relative_to(local_testdir))}"
+        target_path = f"{bucket_name}/{x.relative_to(local_testdir).as_posix()}"
         if x.is_file():
             gcs.upload(str(x), target_path)
     gcs.invalidate_cache()
