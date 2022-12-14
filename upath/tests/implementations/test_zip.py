@@ -10,7 +10,6 @@ from ..cases import BaseTests
 class TestUPathZip(BaseTests):
     @pytest.fixture(autouse=True, scope="function")
     def path(self, zip_fixture):
-        str(self.path)
         self.path = UPath(f"zip://{zip_fixture}")
 
     def test_stat(self):
