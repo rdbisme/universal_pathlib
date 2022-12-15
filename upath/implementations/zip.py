@@ -1,19 +1,16 @@
 from __future__ import annotations
 
-import re
-from typing import TYPE_CHECKING, Generator, TypeVar
-from urllib.parse import ParseResult
+import os
+from typing import Any, Generator, TypeVar
+from urllib.parse import SplitResult
 
 from fsspec.implementations.zip import ZipFileSystem
 
 import upath.core
 
-if TYPE_CHECKING:
-    from urllib.parse import SplitResult
-
 
 class _ZipAccessor(upath.core._FSSpecAccessor):
-    def __init__(self, parsed_url: ParseResult, **kwargs):
+    def __init__(self, parsed_url: SplitResult, **kwargs):
 
         self._fs = ZipFileSystem(f"{parsed_url.netloc}")
 
@@ -22,13 +19,35 @@ class _ZipAccessor(upath.core._FSSpecAccessor):
 
 
 PT = TypeVar("PT", bound="ZipPath")
+
+
 class ZipPath(upath.core.UPath):
     _default_accessor = _ZipAccessor
+
+    @classmethod
+    def _from_parts(
+        cls: type[PT],
+        args: list[str | os.PathLike],
+        url: SplitResult | None = None,
+        **kwargs: Any,
+    ) -> PT:
+
+        entire_url = url.netloc + url.path
+        _extension_end = entire_url.index(".zip") + 4  # 3 is len(.zip)
+
+        netloc = entire_url[:_extension_end]
+        path = entire_url[_extension_end:]
+
+        url = url._replace(path=path, netloc=netloc)
+        args = [path]
+
+        return super()._from_parts(args, url)
 
     def iterdir(self: PT) -> Generator[PT, None, None]:
         """Iterate over the files in this directory.  Does not yield any
         result for the special paths '.' and '..'.
         """
+
         if self.is_file():
             raise NotADirectoryError
 
@@ -37,7 +56,7 @@ class ZipPath(upath.core.UPath):
             if isinstance(name, dict):
                 name = name.get("name").rstrip("/")
 
-            if name == self.name: 
+            if name == self.name:
                 continue
 
             if name in {".", ".."}:

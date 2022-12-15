@@ -520,7 +520,7 @@ class UPath(pathlib.Path):
                 root = "/"
             elif parts[0] == "/":
                 root = parts.pop(0)
-        if (len(obj._parts) == 0 or obj._parts[0] != root): 
+        if len(obj._parts) == 0 or obj._parts[0] != root:
             obj._parts.insert(0, root)
 
         obj._root = root
