@@ -34,7 +34,15 @@ class ZipPath(upath.core.UPath):
 
         if url is not None:
             entire_url = url.netloc + url.path
-            _extension_end = entire_url.rindex(".zip") + 4  # 3 is len(.zip)
+            url_parts = entire_url.split("/")
+
+            first_entry_having_extension = next(
+                p for p in url_parts if ".zip" in p
+            )
+
+            _extension_end = entire_url.index(
+                first_entry_having_extension
+            ) + len(first_entry_having_extension)
 
             netloc = entire_url[:_extension_end]
             path = entire_url[_extension_end:]

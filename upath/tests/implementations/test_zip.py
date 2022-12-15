@@ -1,3 +1,5 @@
+from zipfile import ZipFile
+
 import pytest  # noqa: F401
 
 from upath import UPath
@@ -24,6 +26,28 @@ class TestUPathZip(BaseTests):
         # assert not self.path.is_file()
 
         assert not (self.path / "not-existing-file.txt").is_file()
+
+    def test_zip_in_zip(self, tmp_path):
+        filename = tmp_path / "test.zip"
+        with ZipFile(filename, "w") as zip_file:
+            zip_file.writestr("A.zip", "Content")
+
+        new_path = UPath(f"zip://{filename}")
+
+        nested_zip = new_path / "A.zip"
+
+        assert nested_zip.read_text() == "Content"
+
+    def test_double_extension(self, tmp_path):
+        filename = tmp_path / "test.zip.zip"
+        with ZipFile(filename, "w") as zip_file:
+            zip_file.writestr("A.zip", "Content")
+
+        new_path = UPath(f"zip://{filename}")
+
+        nested_zip = new_path / "A.zip"
+
+        assert nested_zip.read_text() == "Content"
 
     @pytest.mark.xfail(
         reason="Current fsspec ZipFileSystem implementation is read only"
