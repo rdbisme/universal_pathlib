@@ -10,7 +10,6 @@ from pathlib import Path
 
 import fsspec
 import pytest
-from azure.storage.blob import BlobServiceClient
 from fsspec.implementations.local import LocalFileSystem
 from fsspec.registry import _registry, register_implementation
 
@@ -405,4 +404,6 @@ def azure_fixture(azurite_credentials, docker_azurite):
 @pytest.fixture
 def zip_fixture(local_testdir):
     Path(f"{local_testdir}.zip").unlink(missing_ok=True)
-    yield shutil.make_archive(local_testdir, format="zip", root_dir=local_testdir)
+    yield shutil.make_archive(
+        local_testdir, format="zip", root_dir=local_testdir
+    )

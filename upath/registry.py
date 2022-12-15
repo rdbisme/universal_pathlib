@@ -30,7 +30,7 @@ class _Registry:
         "s3a": "upath.implementations.cloud.S3Path",
         "webdav+http": "upath.implementations.webdav.WebdavPath",
         "webdav+https": "upath.implementations.webdav.WebdavPath",
-        "zip": "upath.implementations.zip.ZipPath"
+        "zip": "upath.implementations.zip.ZipPath",
     }
 
     def __getitem__(self, item: str) -> type[PT] | None:

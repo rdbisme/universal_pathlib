@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import pytest  # noqa: F401
 
 from upath import UPath
@@ -27,7 +25,6 @@ class TestUPathZip(BaseTests):
 
         assert not (self.path / "not-existing-file.txt").is_file()
 
-
     @pytest.mark.xfail(
         reason="Current fsspec ZipFileSystem implementation is read only"
     )
@@ -39,7 +36,7 @@ class TestUPathZip(BaseTests):
     )
     def test_mkdir_exists_ok_true(self):
         super().test_mkdir_exists_ok_true()
-    
+
     @pytest.mark.xfail(
         reason="Current fsspec ZipFileSystem implementation is read only"
     )

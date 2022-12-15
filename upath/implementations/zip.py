@@ -14,7 +14,7 @@ class _ZipAccessor(upath.core._FSSpecAccessor):
 
         self._fs = ZipFileSystem(f"{parsed_url.netloc}")
 
-    def _format_path(self, path: ZipPath):
+    def _format_path(self, path: upath.core.UPath):
         return super()._format_path(path).lstrip("/")
 
 
@@ -32,14 +32,15 @@ class ZipPath(upath.core.UPath):
         **kwargs: Any,
     ) -> PT:
 
-        entire_url = url.netloc + url.path
-        _extension_end = entire_url.index(".zip") + 4  # 3 is len(.zip)
+        if url is not None:
+            entire_url = url.netloc + url.path
+            _extension_end = entire_url.index(".zip") + 4  # 3 is len(.zip)
 
-        netloc = entire_url[:_extension_end]
-        path = entire_url[_extension_end:]
+            netloc = entire_url[:_extension_end]
+            path = entire_url[_extension_end:]
 
-        url = url._replace(path=path, netloc=netloc)
-        args = [path]
+            url = url._replace(path=path, netloc=netloc)
+            args = [path]
 
         return super()._from_parts(args, url)
 
@@ -54,7 +55,10 @@ class ZipPath(upath.core.UPath):
         for name in self._accessor.listdir(self):
             # fsspec returns dictionaries
             if isinstance(name, dict):
-                name = name.get("name").rstrip("/")
+                name = name.get("name")
+
+                if name is not None:
+                    name = name.rstrip("/")
 
             if name == self.name:
                 continue
